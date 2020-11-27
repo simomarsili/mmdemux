@@ -3,7 +3,7 @@
 Drop-in replacement for yank.analyze.extract_trajectory
 
 """
-# pylint: disable=no-member,redefined-argument-from-local,logging-format-interpolation,protected-access
+# pylint: disable=no-member,redefined-argument-from-local,protected-access
 
 import logging
 import os
@@ -97,8 +97,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
 
         # Determine if system is periodic
         is_periodic = reference_system.usesPeriodicBoundaryConditions()
-        logger.info(
-            'Detected periodic boundary conditions: {}'.format(is_periodic))
+        logger.info('Detected periodic boundary conditions: %s', is_periodic)
 
         # Get dimensions
         # Assume full iteration until proven otherwise
@@ -116,8 +115,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
             last_checkpoint=last_checkpoint)
         n_frames = trajectory_storage.variables['positions'].shape[0]
         n_atoms = trajectory_storage.variables['positions'].shape[2]
-        logger.info('Number of frames: {}, atoms: {}'.format(
-            n_frames, n_atoms))
+        logger.info('Number of frames: %s, atoms: %s', n_frames, n_atoms)
 
         # Determine frames to extract.
         # Convert negative indices to last indices.
@@ -128,8 +126,8 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         frame_indices = range(start_frame, end_frame, skip_frame)
         if len(frame_indices) == 0:
             raise ValueError('No frames selected')
-        logger.info('Extracting frames from {} to {} every {}'.format(
-            start_frame, end_frame, skip_frame))
+        logger.info('Extracting frames from %s to %s every %s', start_frame,
+                    end_frame, skip_frame)
 
         # Discard equilibration samples
         if discard_equilibration:
@@ -140,9 +138,9 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
                 u_n[1:])
             n_equil_iterations += 1
             logger.info(
-                ('Discarding initial {} equilibration samples (leaving {} '
-                 'effectively uncorrelated samples)...').format(
-                     n_equil_iterations, n_eff))
+                ('Discarding initial %s equilibration samples (leaving %s '
+                 'effectively uncorrelated samples)...', n_equil_iterations,
+                 n_eff))
             # Find first frame post-equilibration.
             if not full_iteration:
                 for iteration in range(n_equil_iterations, n_iterations):
@@ -177,8 +175,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
 
         # Extract state positions and box vectors.
         if state_index is not None:
-            logger.info(
-                'Extracting positions of state {}...'.format(state_index))
+            logger.info('Extracting positions of state %s...', state_index)
 
             # Extract state positions and box vectors.
             frame_idx = 0
@@ -194,8 +191,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
                     frame_idx += 1
 
         else:  # Extract replica positions and box vectors
-            logger.info(
-                'Extracting positions of replica {}...'.format(replica_index))
+            logger.info('Extracting positions of replica %s...', replica_index)
 
             for i, iteration in enumerate(frame_indices):
                 positions[i, :, :] = trajectory_storage.variables['positions'][
