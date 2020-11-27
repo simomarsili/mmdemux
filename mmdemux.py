@@ -3,7 +3,7 @@
 Drop-in replacement for yank.analyze.extract_trajectory
 
 """
-# pylint: disable=no-member,redefined-argument-from-local,logging-format-interpolation,protected-access,unused-variable
+# pylint: disable=no-member,redefined-argument-from-local,logging-format-interpolation,protected-access
 
 import logging
 import os
@@ -136,7 +136,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
             u_n = yank.analyze.extract_u_n(reporter._storage_analysis)
             # Discard frame 0 with minimized energy which throws off automatic
             # equilibration detection.
-            n_equil_iterations, g, n_eff = timeseries.detectEquilibration(
+            n_equil_iterations, _, n_eff = timeseries.detectEquilibration(
                 u_n[1:])
             n_equil_iterations += 1
             logger.info(
