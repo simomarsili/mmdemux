@@ -3,7 +3,7 @@
 Drop-in replacement for yank.analyze.extract_trajectory
 
 """
-# pylint: disable=no-member,redefined-argument-from-local,protected-access
+# pylint: disable=no-member,protected-access
 
 import logging
 import os
