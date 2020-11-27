@@ -104,7 +104,6 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         # Assume full iteration until proven otherwise
         last_checkpoint = True
         trajectory_storage = reporter._storage_checkpoint
-        print(trajectory_storage.variables['positions'].shape)
         if not keep_solvent:
             # If tracked solute particles, use any last iteration, set with
             # this logic test
