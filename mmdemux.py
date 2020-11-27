@@ -233,3 +233,57 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         )
 
     return trajectory
+
+
+def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
+        filename, ref_system, top, nc_path, **kwargs):
+    """
+    Extract trajectory from the NetCDF4 and save to `filename`.
+
+    The format is determined by the filename extension.
+
+    Parameters
+    ----------
+    filename : str
+        Path to output trajectory file.
+    ref_system : System object
+        Reference state System object.
+    top : Topography or Topology object
+    nc_path : str
+        Path to the primary nc_file storing the analysis options
+    nc_checkpoint_file : str or None, Optional
+        File name of the checkpoint file housing the main trajectory
+        Used if the checkpoint file is differently named from the default one
+        chosen by the nc_path file. Default: None
+    state_index : int, optional
+        The index of the alchemical state for which to extract the trajectory.
+        One and only one between state_index and replica_index must be not None
+        (default is None).
+    replica_index : int, optional
+        The index of the replica for which to extract the trajectory. One and
+        only one between state_index and replica_index must be not None
+        (default is None).
+    start_frame : int, optional
+        Index of the first frame to include in the trajectory (default is 0).
+    end_frame : int, optional
+        Index of the last frame to include in the trajectory. If negative, will
+        count from the end (default is -1).
+    skip_frame : int, optional
+        Extract one frame every skip_frame (default is 1).
+    keep_solvent : bool, optional
+        If False, solvent molecules are ignored (default is True).
+    discard_equilibration : bool, optional
+        If True, initial equilibration frames are discarded (see the method
+        pymbar.timeseries.detectEquilibration() for details, default is False).
+    ligand_atoms : iterable or int or str, optional
+        The atomic indices of the ligand. A string is interpreted as a mdtraj
+        DSL specification. Needed for applying pbc using a receptor as anchor.
+
+    Returns
+    -------
+    trajectory: mdtraj.Trajectory
+        The trajectory extracted from the netcdf file.
+
+    """
+    trj = extract_trajectory(ref_system, top, nc_path, **kwargs)
+    trj.save(filename)
