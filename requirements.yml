@@ -1,0 +1,11 @@
+channels:
+  - omnia
+  - conda-forge
+  - defaults
+dependencies:
+  - numpy
+  - openmm
+  - openmmtools
+  - yank
+  - mdtraj
+  - parmed
