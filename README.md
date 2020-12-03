@@ -1,6 +1,7 @@
 # mmdemux
 
-Porting the `extract_trajectory` function from `yank` to `openmmtools`.
+Porting the `extract_trajectory` function from `yank` to `openmmtools`
+(check [this issue](https://github.com/choderalab/openmmtools/issues/487)).
 
 Motivation: the `extract_trajectory` function in the current version of
 `yank` (0.25.2) is not compatible with the replica exchange trajectory files
