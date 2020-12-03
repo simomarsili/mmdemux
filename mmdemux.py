@@ -31,7 +31,8 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         keep_solvent=True,
         discard_equilibration=False,
         image_molecules=False,
-        ligand_atoms=None):
+        ligand_atoms=None,
+        solvent_atoms='auto'):
     """Extract phase trajectory from the NetCDF4 file.
 
     Parameters
@@ -67,7 +68,14 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         pymbar.timeseries.detectEquilibration() for details, default is False).
     ligand_atoms : iterable or int or str, optional
         The atomic indices of the ligand. A string is interpreted as a mdtraj
-        DSL specification. Needed for applying pbc using a receptor as anchor.
+        DSL specification. Needed to recenter with pbc around the receptor if
+        image_molecules=True.
+    solvent_atoms : iterable of int or str, optional
+        The atom indices of the solvent. A string is interpreted as an mdtraj
+        DSL specification of the solvent atoms. Needed to recenter with pbc
+        around solute molecules if image_molecules=True. If 'auto', a list of
+        common solvent residue names will be used to automatically detect
+        solvent atoms (default is 'auto').
 
     Returns
     -------
@@ -84,7 +92,9 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
 
     reference_system = ref_system
     if isinstance(top, mm.app.topology.Topology):
-        topography = yank.Topography(top, ligand_atoms=ligand_atoms)
+        topography = yank.Topography(top,
+                                     ligand_atoms=ligand_atoms,
+                                     solvent_atoms=solvent_atoms)
     else:
         topography = top
     topology = topography.topology
