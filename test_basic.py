@@ -9,12 +9,9 @@ from mmdemux import extract_trajectory
 
 TESTSYS = testsystems.AlanineDipeptideVacuum()
 NC_PATH = Path('test_repex_sim.nc')
-NC_CHK = Path('test_repex_sim_checkpoint.nc')
+NC_CHK = None
 
-kwargs = dict(ref_system=TESTSYS.system,
-              top=TESTSYS.topology,
-              nc_path=NC_PATH,
-              nc_checkpoint_file=NC_CHK)
+kwargs = dict(ref_system=TESTSYS.system, top=TESTSYS.topology, nc_path=NC_PATH)
 
 
 def test_state():
