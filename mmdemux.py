@@ -288,11 +288,12 @@ def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
     ligand_atoms : iterable or int or str, optional
         The atomic indices of the ligand. A string is interpreted as a mdtraj
         DSL specification. Needed for applying pbc using a receptor as anchor.
-
-    Returns
-    -------
-    trajectory: mdtraj.Trajectory
-        The trajectory extracted from the netcdf file.
+    solvent_atoms : iterable of int or str, optional
+        The atom indices of the solvent. A string is interpreted as an mdtraj
+        DSL specification of the solvent atoms. Needed to recenter with pbc
+        around solute molecules if image_molecules=True. If 'auto', a list of
+        common solvent residue names will be used to automatically detect
+        solvent atoms (default is 'auto').
 
     """
     trj = extract_trajectory(ref_system, top, nc_path, **kwargs)
