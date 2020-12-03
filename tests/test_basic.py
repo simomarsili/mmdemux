@@ -7,9 +7,14 @@ from openmmtools import testsystems
 
 from mmdemux import extract_trajectory
 
+
+def base_dir():
+    """Path to the test dir"""
+    return Path(__file__).parent.absolute()
+
+
 TESTSYS = testsystems.AlanineDipeptideVacuum()
-NC_PATH = Path('test_repex_sim.nc')
-NC_CHK = None
+NC_PATH = base_dir() / 'test_repex_sim.nc'
 
 kwargs = dict(ref_system=TESTSYS.system, top=TESTSYS.topology, nc_path=NC_PATH)
 
