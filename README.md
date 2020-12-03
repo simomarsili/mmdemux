@@ -18,9 +18,9 @@ Usage:
 ```python
 from mmdemux import extract_trajectory, extract_trajectory_to_file
 
-trj = extract_trajectory(ref_system=<system>, top=<topology>, nc_path=<path to the NetCD4 file>)
+trj = extract_trajectory(ref_system=<reference system>, top=<topology>, nc_path=<path to the NetCD4 file>)
 
-extract_trajectory_to_file(<filename>, ref_system=<system>, top=<topology>, nc_path=<path to the NetCD4 file>)
+extract_trajectory_to_file(<filename>, ref_system=<reference system>, top=<topology>, nc_path=<path to the NetCD4 file>)
 
 ```
 
