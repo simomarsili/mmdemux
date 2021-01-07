@@ -11,22 +11,24 @@ Install: clone the repo and install in a virtual environment using
 Needs `yank`. For a full list of dependencies, check the `requirements.yml`
 file.
 
-Usage:
+Extract frames corresponding to state index 0:
 
 ```python
 from mmdemux import extract_trajectory, extract_trajectory_to_file
 
-trj = extract_trajectory(ref_system=<reference system>, top=<topology>, nc_path=<path to the NetCD4 file>)
-
-extract_trajectory_to_file(<filename>, ref_system=<reference system>, top=<topology>, nc_path=<path to the NetCD4 file>)
+trj = extract_trajectory(ref_system=<reference system>, top=<topology>,
+nc_path=<path to the NetCD4 file>, state_index=0)
 
 ```
 
-`extract_trajectry` will return a `mdtraj.Trajectory object`.
+`extract_trajectory` returns a `mdtraj.Trajectory object`.
 
+If a path is passed using the `to_file` argument, the function will save the
+trajectory to a file with the file format determined by the filename extension.
 
-`extract_trajectory_to_file` will save the trajectory to `filename` with the
-file format determined by the filename extension.
+Write frames corresponding to state index 0 to file `trj.nc`:
 
-
-
+```python
+extract_trajectory(ref_system=<reference system>, top=<topology>,
+nc_path=<path to the NetCD4 file>, state_index=0, to_file='trj.nc')
+```
