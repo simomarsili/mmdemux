@@ -296,5 +296,6 @@ def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
         solvent atoms (default is 'auto').
 
     """
-    trj = extract_trajectory(ref_system, top, nc_path, **kwargs)
-    trj.save(filename)
+    trajectory = extract_trajectory(ref_system, top, nc_path, **kwargs)
+    trajectory.save(filename)
+    return trajectory
