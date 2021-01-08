@@ -24,7 +24,7 @@ nc_path=<path to the NetCD4 file>, state_index=0)
 `extract_trajectory` returns a mdtraj `Trajectory` object.
 
 `extract_trajectory_to_file` will save the trajectory to file with the file
-format determined by the filename extension.
+format determined by the filename extension (using the `mdtraj` convention).
 
 Write frames corresponding to state index 0 to a NetCDF file `trj.nc`:
 
