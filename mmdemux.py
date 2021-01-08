@@ -33,7 +33,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         image_molecules=False,
         ligand_atoms=None,
         solvent_atoms='auto',
-        to_file=False):
+        to_file=None):
     """Extract phase trajectory from the NetCDF4 file.
 
     Parameters
@@ -77,7 +77,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         around solute molecules if image_molecules=True. If 'auto', a list of
         common solvent residue names will be used to automatically detect
         solvent atoms (default is 'auto').
-    to_file : str, optional
+    to_file : str or False, optional
         Save phase trajectory to file. Default: False.
 
     Returns
@@ -242,8 +242,8 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
                                    anchor_molecules=anchor_molecules)
     elif image_molecules:
         logger.warning(
-            'The molecules will not be imaged because the system is non-periodic.'
-        )
+            'The molecules will not be imaged because the system is '
+            'non-periodic.')
 
     if to_file:
         trajectory.save(to_file)
@@ -301,12 +301,9 @@ def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
         common solvent residue names will be used to automatically detect
         solvent atoms (default is 'auto').
 
-    Returns
-    -------
-    trajectory: mdtraj.Trajectory
-        The trajectory extracted from the netcdf file.
-
     """
-    trajectory = extract_trajectory(ref_system, top, nc_path, **kwargs)
-    trajectory.save(filename)
-    return trajectory
+    _ = extract_trajectory(ref_system,
+                           top,
+                           nc_path,
+                           to_file=filename,
+                           **kwargs)
