@@ -23,12 +23,12 @@ nc_path=<path to the NetCD4 file>, state_index=0)
 
 `extract_trajectory` returns a mdtraj `Trajectory` object.
 
-If a path is passed using the `to_file` argument, the function will save the
-trajectory to a file with the file format determined by the filename extension.
+`extract_trajectory_to_file` will save the trajectory to file with the file
+format determined by the filename extension.
 
-Write frames corresponding to state index 0 to file `trj.nc`:
+Write frames corresponding to state index 0 to a NetCDF file `trj.nc`:
 
 ```python
-extract_trajectory(ref_system=<reference system>, top=<topology>,
-nc_path=<path to the NetCD4 file>, state_index=0, to_file='trj.nc')
+extract_trajectory_to_file('trj.nc', ref_system=<reference system>,
+top=<topology>, nc_path=<path to the NetCD4 file>, state_index=0)
 ```
