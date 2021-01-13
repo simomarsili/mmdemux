@@ -18,7 +18,7 @@ from mmdemux import extract_trajectory, extract_trajectory_to_file
 
 trj = extract_trajectory(nc_path=<path to the NetCD4 file>,
                          state_index=0, ref_system=<reference system>,
-						 top=<topology>)
+                         top=<topology>)
 
 ```
 
@@ -32,7 +32,7 @@ Write frames corresponding to state index 0 to a NetCDF file `trj.nc`:
 ```python
 extract_trajectory_to_file(nc_path=<path to the NetCDF file>'trj.nc',
                            out_path=`trj.nc`, state_index=0,
-						   ref_system=<reference system>,
+                           ref_system=<reference system>,
                            top=<topology>)
 
 ```
