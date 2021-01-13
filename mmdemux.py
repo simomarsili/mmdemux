@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
-        ref_system,
-        top,
         nc_path,
+        ref_system=None,
+        top=None,
         nc_checkpoint_file=None,
         state_index=None,
         replica_index=None,
@@ -38,11 +38,13 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
 
     Parameters
     ----------
-    ref_system : System object
-        Reference state System object.
-    top : Topography or Topology object
     nc_path : str
         Path to the primary nc_file storing the analysis options
+    ref_system : System object, optional
+        Reference state System object.
+        Needed if nc file metadata does not store the reference_system.
+    top : Topography or Topology object, optional
+        Needed if nc file metadata does not store topography.
     nc_checkpoint_file : str or None, Optional
         File name of the checkpoint file housing the main trajectory
         Used if the checkpoint file is differently named from the default one
@@ -93,21 +95,42 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
     if not os.path.isfile(nc_path):
         raise ValueError('Cannot find file {}'.format(nc_path))
 
-    reference_system = ref_system
-    if isinstance(top, mm.app.topology.Topology):
-        topography = yank.Topography(top,
-                                     ligand_atoms=ligand_atoms,
-                                     solvent_atoms=solvent_atoms)
-    else:
-        topography = top
+    reporter = mmtools.multistate.MultiStateReporter(
+        nc_path, open_mode='r', checkpoint_storage=nc_checkpoint_file)
+    metadata = reporter.read_dict('metadata')
+
+    try:  # try to get topology and system from nc file
+        reference_system = mmtools.utils.deserialize(
+            metadata['reference_state']).system
+        topography = mmtools.utils.deserialize(metadata['topography'])
+        topology = topography.topology
+    except KeyError:
+        topography = None
+
+    if ref_system:  # override system
+        reference_system = ref_system
+
+    if top:  # override topology/topography
+        if isinstance(top, mm.app.topology.Topology):
+            if topography:
+                topography.topology = top
+            else:
+                topography = yank.Topography(top,
+                                             ligand_atoms=ligand_atoms,
+                                             solvent_atoms=solvent_atoms)
+        elif isinstance(top, yank.Topography):
+            topography = top
+        else:
+            raise ValueError('`top` value must be either a Topology '
+                             'or Topography object')
+    if not topography:
+        # No topology/topography can be found in the container or has been
+        # passed as argument
+        raise ValueError('`top` value must be a topology/topography')
     topology = topography.topology
 
     # Import simulation data
-    reporter = None
     try:
-        reporter = mmtools.multistate.MultiStateReporter(
-            nc_path, open_mode='r', checkpoint_storage=nc_checkpoint_file)
-
         # Determine if system is periodic
         is_periodic = reference_system.usesPeriodicBoundaryConditions()
         logger.info('Detected periodic boundary conditions: %s', is_periodic)
