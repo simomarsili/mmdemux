@@ -50,6 +50,7 @@ EXTRAS_REQUIRES = {'test': ['pytest']}
 setup(long_description=long_description,
       py_modules=modules,
       packages=packages,
+      entry_points={'console_scripts': ['mmdemux=mmdemux:main']},
       setup_requires=SETUP_REQUIRES,
       install_requires=INSTALL_REQUIRES,
       extras_require=EXTRAS_REQUIRES,
