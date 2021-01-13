@@ -7,6 +7,7 @@ Drop-in replacement for yank.analyze.extract_trajectory
 
 import logging
 import os
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 import mdtraj
 import numpy as np
@@ -40,10 +41,10 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
     ----------
     nc_path : str
         Path to the primary nc_file storing the analysis options
-    ref_system : System object, optional
+    ref_system : System object or path to serialized System object, optional
         Reference state System object.
         Needed if nc file metadata does not store the reference_system.
-    top : Topography or Topology object, optional
+    top : Topography or Topology object path to .pdb file, optional
         Needed if nc file metadata does not store topography.
     nc_checkpoint_file : str or None, Optional
         File name of the checkpoint file housing the main trajectory
@@ -108,21 +109,27 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         topography = None
 
     if ref_system:  # override system
-        reference_system = ref_system
+        if isinstance(ref_system, mm.openmm.System):
+            reference_system = ref_system
+        else:  # deserialize from file
+            with open(ref_system, 'r') as fp:
+                reference_system = mm.openmm.XmlSerializer.deserialize(
+                    fp.read())
 
     if top:  # override topology/topography
-        if isinstance(top, mm.app.topology.Topology):
+        if isinstance(top, yank.Topography):
+            topography = top
+        else:
+            if not isinstance(top, mm.app.topology.Topology):  # it's a pdb
+                pdb = top
+                top = mdtraj.load(pdb).topology.to_openmm()
             if topography:
                 topography.topology = top
-            else:
+            else:  # initialize a topography
                 topography = yank.Topography(top,
                                              ligand_atoms=ligand_atoms,
                                              solvent_atoms=solvent_atoms)
-        elif isinstance(top, yank.Topography):
-            topography = top
-        else:
-            raise ValueError('`top` value must be either a Topology '
-                             'or Topography object')
+
     if not topography:
         # No topology/topography can be found in the container or has been
         # passed as argument
@@ -275,21 +282,37 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
 
 
 def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
-        filename, ref_system, top, nc_path, **kwargs):
+        nc_path,
+        out_path,
+        ref_system=None,
+        top=None,
+        nc_checkpoint_file=None,
+        state_index=None,
+        replica_index=None,
+        start_frame=0,
+        end_frame=-1,
+        skip_frame=1,
+        keep_solvent=True,
+        discard_equilibration=False,
+        image_molecules=False,
+        ligand_atoms=None,
+        solvent_atoms='auto'):
     """
-    Extract trajectory from the NetCDF4 and save to `filename`.
+    Extract trajectory from the NetCDF4 and save to `out_path`.
 
-    The format is determined by the filename extension.
+    The output format is determined by the filename extension.
 
     Parameters
     ----------
-    filename : str
-        Path to output trajectory file.
-    ref_system : System object
-        Reference state System object.
-    top : Topography or Topology object
     nc_path : str
         Path to the primary nc_file storing the analysis options
+    out_path : str
+        Path to output trajectory file.
+    ref_system : System object or path to serialized System object, optional
+        Reference state System object.
+        Needed if nc file metadata does not store the reference_system.
+    top : Topography or Topology object path to .pdb file, optional
+        Needed if nc file metadata does not store topography.
     nc_checkpoint_file : str or None, Optional
         File name of the checkpoint file housing the main trajectory
         Used if the checkpoint file is differently named from the default one
@@ -325,8 +348,48 @@ def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
         solvent atoms (default is 'auto').
 
     """
-    _ = extract_trajectory(ref_system,
-                           top,
-                           nc_path,
-                           to_file=filename,
-                           **kwargs)
+    _ = extract_trajectory(nc_path=nc_path,
+                           ref_system=ref_system,
+                           top=top,
+                           nc_checkpoint_file=nc_checkpoint_file,
+                           state_index=state_index,
+                           replica_index=replica_index,
+                           start_frame=start_frame,
+                           end_frame=end_frame,
+                           skip_frame=skip_frame,
+                           keep_solvent=keep_solvent,
+                           discard_equilibration=discard_equilibration,
+                           image_molecules=image_molecules,
+                           ligand_atoms=ligand_atoms,
+                           solvent_atoms=solvent_atoms,
+                           to_file=out_path)
+
+
+def parse_command_line_args():
+    """Parse command line options."""
+    parser = ArgumentParser(formatter_class=RawDescriptionHelpFormatter,
+                            description=__doc__)
+    parser.add_argument('nc_path',
+                        type=str,
+                        help='Path to the nc file storing analysis options.')
+    parser.add_argument('out_path',
+                        type=str,
+                        help='Path to output trajectory file.')
+    parser.add_argument('-s', '--state_index', type=int, default=0)
+    parser.add_argument('-r', '--replica_index', type=int)
+    parser.add_argument('--ref_system',
+                        type=str,
+                        help='Path to serialized System object.')
+    parser.add_argument('--top', type=str, help='Path to .pdb file.')
+    parser.add_argument('--nc_checkpoint_file', type=str)
+    return vars(parser.parse_args())
+
+
+def main():
+    """Extract trajectory from contaner."""
+    kwargs = parse_command_line_args()
+    extract_trajectory_to_file(**kwargs)
+
+
+if __name__ == '__main__':
+    main()
