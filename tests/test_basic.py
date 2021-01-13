@@ -13,22 +13,26 @@ def base_dir():
     return Path(__file__).parent.absolute()
 
 
-TESTSYS = testsystems.AlanineDipeptideVacuum()
-NC_PATH = base_dir() / 'test_repex_sim.nc'
+TESTSYS = testsystems.AlanineDipeptideImplicit()
+NC_PATH = base_dir() / 'test_repex.nc'
 
 kwargs = dict(ref_system=TESTSYS.system, top=TESTSYS.topology, nc_path=NC_PATH)
 
 
 def test_state():
     trj = extract_trajectory(state_index=0, **kwargs)
-    assert trj.n_frames == 51
+    assert trj.n_frames == 11
 
 
 def test_replica():
     trj = extract_trajectory(replica_index=0, **kwargs)
-    assert trj.n_frames == 51
+    assert trj.n_frames == 11
 
 
 def test_index_out_of_bounds():
     trj = extract_trajectory(state_index=3, **kwargs)
     assert trj.n_frames == 0
+
+
+if __name__ == '__main__':
+    test_state()
