@@ -34,5 +34,19 @@ def test_index_out_of_bounds():
     assert trj.n_frames == 0
 
 
+def test_from_system_file():
+    kw = dict(kwargs)
+    kw['ref_system'] = 'test_repex.xml'
+    trj = extract_trajectory(state_index=0, **kw)
+    assert trj.n_frames == 11
+
+
+def test_from_pdb_file():
+    kw = dict(kwargs)
+    kw['top'] = 'test_repex.pdb'
+    trj = extract_trajectory(state_index=0, **kw)
+    assert trj.n_frames == 11
+
+
 if __name__ == '__main__':
     test_state()
