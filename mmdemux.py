@@ -8,6 +8,7 @@ Drop-in replacement for yank.analyze.extract_trajectory
 import logging
 import os
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from pathlib import Path
 
 import mdtraj
 import numpy as np
@@ -89,6 +90,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
         The trajectory extracted from the netcdf file.
 
     """
+
     # Check correct input
     if (state_index is None) == (replica_index is None):
         raise ValueError('One and only one between "state_index" and '
@@ -116,19 +118,22 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
                 reference_system = mm.openmm.XmlSerializer.deserialize(
                     fp.read())
 
-    if top:  # override topology/topography
+    if top:
         if isinstance(top, yank.Topography):
             topography = top
-        else:
-            if not isinstance(top, mm.app.topology.Topology):  # it's a pdb
-                pdb = top
-                top = mdtraj.load(pdb).topology.to_openmm()
+        else:  # init from topology
+            if isinstance(top, str):
+                top = mdtraj.load(top).topology
+            elif isinstance(top, Path):
+                top = mdtraj.load(str(top)).topology
+            elif isinstance(top, mm.app.Topology):
+                top = mdtraj.Topology.from_openmm(top)
             if topography:
-                topography.topology = top
-            else:  # initialize a topography
-                topography = yank.Topography(top,
-                                             ligand_atoms=ligand_atoms,
-                                             solvent_atoms=solvent_atoms)
+                ligand_atoms = ligand_atoms or topography.ligand_atoms
+                solvent_atoms = solvent_atoms or topography.solvent_atoms
+            topography = yank.Topography(top,
+                                         ligand_atoms=ligand_atoms,
+                                         solvent_atoms=solvent_atoms)
 
     if not topography:
         # No topology/topography can be found in the container or has been
@@ -276,7 +281,7 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
             'non-periodic.')
 
     if to_file:
-        trajectory.save(to_file)
+        trajectory.save(str(to_file))
 
     return trajectory
 
