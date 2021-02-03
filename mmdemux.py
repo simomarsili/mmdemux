@@ -387,12 +387,22 @@ def parse_command_line_args():
                         help='Path to serialized System object.')
     parser.add_argument('--top', type=str, help='Path to .pdb file.')
     parser.add_argument('--nc_checkpoint_file', type=str)
+    parser.add_argument('--start', type=0, default=0)
+    parser.add_argument('--stop', type=int, default=None)
+    parser.add_argument('--step', type=int, default=1)
     return vars(parser.parse_args())
 
 
 def main():
     """Extract trajectory from contaner."""
     kwargs = parse_command_line_args()
+    kwargs['start_frame'] = kwargs.pop('start', 0)
+    stop = kwargs.pop('stop', None)
+    if stop is not None:
+        if stop == 0:
+            raise ValueError('Cant extract 0 frames.')
+        kwargs['end_frame'] = stop - 1 if stop > 0 else stop
+    kwargs['skip_frame'] = kwargs.pop('step', 1)
     extract_trajectory_to_file(**kwargs)
 
 
