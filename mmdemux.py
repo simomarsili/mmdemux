@@ -403,17 +403,9 @@ def main():
     kwargs = parse_command_line_args()
 
     # process start/stop/step
-    start = kwargs.pop('start')
-    stop = kwargs.pop('stop')
-    step = kwargs.pop('step')
-    if start:
-        kwargs['start_frame'] = start
-    if stop is not None:
-        if stop == 0:
-            raise ValueError('Cant extract 0 frames.')
-        kwargs['end_frame'] = stop - 1 if stop > 0 else stop
-    if step:
-        kwargs['skip_frame'] = step
+    kwargs['start_frame'] = kwargs.pop('start', 0)
+    kwargs['end_frame'] = kwargs.pop('stop', -1)
+    kwargs['skip_frame'] = kwargs.pop('step', 1)
 
     split = kwargs.pop('split')
     if not split:
@@ -425,8 +417,7 @@ def main():
         stem = out_path.stem
         suffix = out_path.suffix
         trj = extract_trajectory(**kwargs)
-        s = slice(start, stop, step)
-        for i, frame in enumerate(trj[s]):
+        for i, frame in enumerate(trj):
             filename = '.'.join([stem, str(i)]) + suffix
             frame.save(filename)
 
