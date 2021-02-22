@@ -445,7 +445,7 @@ def main():
         topology = extract_trajectory.topology
 
     if extract_topology:
-        if not mmlite_not_installed:
+        if mmlite_not_installed:
             raise ModuleNotFoundError('mmlite not installed')
         save_top(topology, reference_system, path=parent / 'system.top')
 
