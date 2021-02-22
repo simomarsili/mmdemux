@@ -17,6 +17,13 @@ import simtk.openmm as mm
 import yank
 from pymbar import timeseries
 
+try:
+    from mmlite.gromacs import save_top
+except ModuleNotFoundError:
+    mmlite_not_installed = True
+else:
+    mmlite_not_installed = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -283,6 +290,9 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
     if to_file:
         trajectory.save(str(to_file))
 
+    extract_trajectory.reference_system = reference_system
+    extract_trajectory.topology = topology
+
     return trajectory
 
 
@@ -369,6 +379,9 @@ def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
                            solvent_atoms=solvent_atoms,
                            to_file=out_path)
 
+    extract_trajectory_to_file.reference_system = extract_trajectory.reference_system
+    extract_trajectory_to_file.topology = extract_trajectory.topology
+
 
 def parse_command_line_args():
     """Parse command line options."""
@@ -389,10 +402,14 @@ def parse_command_line_args():
     parser.add_argument('--nc_checkpoint_file', type=str)
     # these options need pre-processing
     parser.add_argument('--start', type=int, default=0)
-    parser.add_argument('--stop', type=int, default=None)
+    parser.add_argument('--stop', type=int, default=-1)
     parser.add_argument('--step', type=int, default=1)
     parser.add_argument('--split',
                         dest='split',
+                        action='store_true',
+                        default=False)
+    parser.add_argument('--extract_topology',
+                        dest='extract_topology',
                         action='store_true',
                         default=False)
     return vars(parser.parse_args())
@@ -408,11 +425,15 @@ def main():
     kwargs['skip_frame'] = kwargs.pop('step', 1)
 
     split = kwargs.pop('split')
+    extract_topology = kwargs.pop('extract_topology')
+
+    out_path = Path(kwargs.pop('out_path'))
+    parent = out_path.parent
     if not split:
-        extract_trajectory_to_file(**kwargs)
+        extract_trajectory_to_file(out_path=out_path, **kwargs)
+        reference_system = extract_trajectory_to_file.reference_system
+        topology = extract_trajectory_to_file.topology
     else:  # split trajectory into frames
-        out_path = Path(kwargs.pop('out_path'))
-        parent = out_path.parent
         parent.mkdir(parents=True, exist_ok=True)  # mkdir if needed
         stem = out_path.stem
         suffix = out_path.suffix
@@ -420,6 +441,13 @@ def main():
         for i, frame in enumerate(trj):
             filename = '.'.join([stem, str(i)]) + suffix
             frame.save(filename)
+        reference_system = extract_trajectory.reference_system
+        topology = extract_trajectory.topology
+
+    if extract_topology:
+        if not mmlite_not_installed:
+            raise ModuleNotFoundError('mmlite not installed')
+        save_top(topology, reference_system, path=parent / 'system.top')
 
 
 if __name__ == '__main__':
