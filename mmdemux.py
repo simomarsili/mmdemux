@@ -292,8 +292,6 @@ def extract_trajectory(  # pylint: disable=R0912,R0913,R0914,R0915
 
     extract_trajectory.reference_system = reference_system
     extract_trajectory.topology = topology
-    extract_trajectory.standard_state_correction = metadata.get(
-        'standard_state_correction', None)
 
     return trajectory
 
@@ -383,7 +381,6 @@ def extract_trajectory_to_file(  # pylint: disable=R0912,R0913,R0914,R0915
 
     extract_trajectory_to_file.reference_system = extract_trajectory.reference_system
     extract_trajectory_to_file.topology = extract_trajectory.topology
-    extract_trajectory_to_file.standard_state_correction = extract_trajectory.standard_state_correction  # pylint: disable=line-too-long
 
 
 def parse_command_line_args():
@@ -436,7 +433,6 @@ def main():
         extract_trajectory_to_file(out_path=out_path, **kwargs)
         reference_system = extract_trajectory_to_file.reference_system
         topology = extract_trajectory_to_file.topology
-        ssc = extract_trajectory_to_file.standard_state_correction
     else:  # split trajectory into frames
         parent.mkdir(parents=True, exist_ok=True)  # mkdir if needed
         stem = out_path.stem
@@ -447,16 +443,11 @@ def main():
             frame.save(filename)
         reference_system = extract_trajectory.reference_system
         topology = extract_trajectory.topology
-        ssc = extract_trajectory.standard_state_correction
 
     if extract_topology:
         if mmlite_not_installed:
             raise ModuleNotFoundError('mmlite not installed')
         save_top(topology, reference_system, path=parent / 'system.top')
-
-    if ssc is not None:
-        with open(parent / 'standard_state_correction.txt', 'w') as fp:
-            print('%s  # in kT units' % ssc, file=fp)
 
 
 if __name__ == '__main__':
